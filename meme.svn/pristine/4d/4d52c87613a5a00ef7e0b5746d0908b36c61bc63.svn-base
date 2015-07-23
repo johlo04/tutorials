@@ -1,0 +1,146 @@
+<link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/ngDialog-master/css/myth/ngDialog.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/ngDialog-master/css/myth/ngDialog-theme-default.css'); ?>" />
+<script type="text/javascript" src="<?php echo base_url('assets/ngDialog-master/js/ngDialog.min.js'); ?>"></script>
+<h3>Note List</h3>
+<div ng-app="sampleApp">
+	<div class="row">
+		<div class="col-sm-12" ng-controller="MainCtrl">
+			
+			<div class="table-responsive">
+				<table class="table table-bordered table-hovered table-striped">
+					<thead>
+						<tr>
+							<td class="text-center">ID</td>
+							<td class="text-center">Writer</td>
+							<td class="text-center">Subject</td>
+							<td class="text-center">Message</td>
+							<td class="text-center">
+								<button class="btn btn-primary btn-xs" ng-click="open('md')">Add Note</button>
+							</td>
+						</tr>
+					</thead>
+					<tbody>
+						<?php if(count($note_list) > 0) { ?>
+							
+							<?php foreach($note_list as $list) { ?>
+								<tr id="list-row-<?php echo $list['id']; ?>">
+									<td class="text-center"><?php echo $list['id']; ?></td>
+									<td class="text-left"><?php echo $list['writer']; ?></td>
+									<td class="text-left"><?php echo $list['subject']; ?></td>
+									<td class="text-left"><?php echo $list['message']; ?></td>
+									<td class="text-center">
+										<button type="button" class="btn btn-default btn-xs">Update</button>
+										<button type="button" class="btn btn-danger btn-xs">Remove</button>
+									</td>
+								</tr>
+							<?php } ?>
+							
+						<?php } else { ?>
+							<tr>
+								<td colspan="5">
+									<p class="text-center text-danger">No note saved yet</p>
+								</td>
+							</tr>
+						<?php } ?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+		<script type="text/ng-template" id="myModalContent">
+		
+			<ng-form name="noteForm" id="noteForm">
+		
+				<div class="modal-header">
+					<h3 class="modal-title">Add New Note</h3>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="form-group col-md-12">
+							<label>Subject</label>
+							<input type="text" class="form-control" ng-model="c_subject"/>
+							<div class="help-block error" ng-show="noteForm.c_subject.$error.required">Required</div>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="form-group col-md-12">
+							<label>Sender</label>
+							<input type="text" class="form-control" ng-model="c_sender"/>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="form-group col-md-12">
+							<label>Message</label>
+							<textarea class="form-control" ng-model="c_message"></textarea>
+						</div>
+					</div>
+				   
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary btn-sm" ng-click="ok()">OK</button>
+					<button class="btn btn-warning btn-sm" ng-click="cancel()">Cancel</button>
+				</div>
+			
+			</ng-form>
+			
+		</script>
+		
+	</div>	
+	
+</div>
+
+<script type="text/javascript">
+
+	angular.module('sampleApp',['ui.bootstrap']).controller('MainCtrl', function($scope, $modal, $log) {
+		
+		$scope.animationsEnabled = true;
+		
+		$scope.open = function open(size) {
+			
+			var modalInstance = $modal.open({
+				animation: $scope.animationsEnabled,
+				templateUrl: 'myModalContent',
+				size: size,
+				controller: 'ModalInstanceCtrl',
+			});
+			
+		}
+		
+	});
+	
+	angular.module('sampleApp').controller('ModalInstanceCtrl', function($scope, $modalInstance){
+		
+		$scope.ok = function () {
+			alert('you clicked!');
+		};
+
+		$scope.cancel = function () {
+			$modalInstance.dismiss('cancel');
+		};
+		
+	});
+	
+	
+</script>
+
+<!--
+<script type="text/javascript">
+	
+	var app = angular.module('exampleApp',['ngDialog']);
+	
+	app.controller('MainCtrl', function($scope, ngDialog) {
+		
+		$scope.test = 'hello';
+		
+		$scope.clickToOpen = function() {
+			ngDialog.open({
+				template: 'myModalContent',
+				scope: $scope
+			});
+		}
+	});
+	
+</script>
+-->

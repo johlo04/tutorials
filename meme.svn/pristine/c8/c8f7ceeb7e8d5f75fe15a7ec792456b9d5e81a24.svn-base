@@ -1,0 +1,4 @@
+.dark { background-color: #333; }
+.quotation_header { font-size: 18px; color: #000; background: transparent; border: 0px; width: 90%; }
+.quotation_header:hover { cursor: pointer; color: #ff0000}
+.subtotal { color: #048BD8; }

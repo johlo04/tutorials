@@ -1,0 +1,481 @@
+<h3>Quotation List Form</h3>
+
+<style>
+	.table-nonfluid {
+	   width: 60% !important;
+	}
+</style>
+
+<div class="row" ng-app="quotation_list">
+		
+	<div class="col-md-12" ng-controller="quoteListCtrl as quotelist">
+		
+		<div class="row">
+			
+			<div class="col-md-12">
+			
+				<div class="table-responsived">
+					
+					<table class="table table-bordered">
+						<tr>
+							<td class="text-right"><label>To: </label></td>
+							<td>
+								<input type="text" class="form-control" ng-model="quotelist.receiver" />
+							</td>
+							<td class="text-right"><label>Reference No: </label></td>
+							<td>
+								<input type="text" class="form-control text-right" ng-model="quotelist.reference_no" />
+							</td>
+						</tr>
+
+						<tr>
+							<td class="text-right"><label>Address: </label></td>
+							<td>
+								<textarea class="form-control" ng-model="quotelist.address"></textarea>
+							</td>
+							<td class="text-right"><label>Date: </label></td>
+							<td>
+
+								<p class="input-group">
+									<input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="quotelist.dt" is-open="opened" min-date="minDate" max-date="'2015-12-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" readonly />
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+									</span>
+								</p>
+								
+							</td>
+						</tr>
+
+						<tr>
+							<td class="text-right"><label>Project Name: </label></td>
+							<td colspan="4">
+								<input type="text" class="form-control input-sm" ng-model="quotelist.project_name" />
+							</td>
+						</tr>
+
+					</table>
+
+				</div>
+
+				<p class="note">We are pleased to submit herewith our quotaion for the following:</p>
+		
+			</div>
+
+		</div>
+			
+		<section ng-controller="PanelController as panel">
+
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="nav nav-pills">
+						<li ng-class="{ active:panel.isSelected(1) }">
+							<a href="#" ng-click="panel.selectTab(1)">Quotation Form</a>
+						</li>
+						<li ng-class="{ active:panel.isSelected(2) }">
+							<a href="#" ng-click="panel.selectTab(2)">Terms & Condition</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="panel pane-default" ng-show="panel.isSelected(1)">
+				
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<div class="form-group">
+							<button type="button" class="btn btn-primary" ng-click="addParticularHeader()"><span class="fa fa-plus"></span> Add Particular Header</button>
+							<button type="button" class="btn btn-success" ng-hide="!hasContent()" ng-click="saveContent()">Save Quotation</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- quotation json viewer
+				<div class="well dark">
+					<json-formatter json="json_output" open="1" class="json-formatter-dark"></json-formatter>
+				</div>
+				
+				<div class="well">{{ json_view }}</div>
+				-->
+				
+				<div ng-repeat="item in quoteHeader.items" class="row">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="fa fa-pencil pull-left"></div> <input type="text" data-toggle="tooltip" title="Click to edit" ng-model="item.particular_name" class="pull-left quotation_header" /> <span class="pull-right btn btn-danger" ng-click="removeQuoteHeader($index)"><span class="fa fa-times"></span> Remove</span>
+							<div class="clearfix"></div>
+						</div>
+						<div class="panel-body">
+							<div class="table-responsive">
+								<table class="table table-bordered table-hover table-striped">
+									<thead>
+										<tr>
+											<td class="text-center"><label>No.</label></td>
+											<td class="text-center"><label>Particulars</label></td>
+											<td class="text-center"><label>Unit</label></td>
+											<td class="text-center"><label>Unit Label</label></td>
+											<td class="text-center"><label>Unit(Price)</label></td>
+											<td class="text-center"><label>Unit Price(Php)</label></td>
+											<td class="text-center">
+												<button type="button" class="btn btn-default" ng-click="toggleDetail($index)">Collapse Detail</button>
+											</td>
+										</tr>
+									</thead>
+									<tbody ng-hide="toggleList">
+										<tr ng-repeat="item in quoteHeader.items[$index].child_label.items">
+											<td class="text-center">{{ $index + 1 }}</td>
+											<td class="text-center">
+												<input type="text" name="quotation[$parent.$index][$index][particular]" class="form-control" ng-model="item.particular" />
+											</td>
+											<td class="text-center">
+												<input type="number" name="quotation[$parent.$index][$index][unit]" class="form-control text-center" ng-model="item.unit" ng-minlength="1" min="1" />
+											</td>
+											<td class="text-center">
+												<select class="form-control" name="quotation[$parent.$index][$index][unit_label]" ng-model="item.unit_label">
+													<option value="sqm">sqm</option>
+													<option value="lot">lot</option>
+													<option value="sets">sets</option>
+												</select>
+											</td>
+											<td class="text-center">
+												<input type="number" name="quotation[$parent.$index][$index][unit_price]" class="form-control text-right" ng-model="item.unit_price" />
+											</td>
+											<td class="text-center">
+												<input type="text" class="form-control text-right" value="{{ item.unit * item.unit_price | currency: '₱ ' }}" readonly />
+												<input type="hidden" name="quotation[$parent.$index][$index][subtotal]" ng-model="item.subtotal" value="{{ item.unit * item.unit_price }}" />
+											</td>
+											<td class="text-center">
+												<!--
+												<button type="button" class="btn btn-primary" ng-click="addSubLevel($parent.$index)"><span class="fa fa-plus"></span></button>
+												-->
+												<button type="button" class="btn btn-danger" ng-click="removeParent($parent.$index, $index)"><span class="fa fa-times"></span></button>
+											</td>
+										</tr>
+										
+										<tr>
+											<td colspan="7" class="text-center" ng-show="!quoteHeader.items[$index].child_label.items.length">
+												<p><i class="fa fa-exclamation-circle"></i> No list yet!</p>
+											</td>
+										</tr>
+
+									</tbody>
+									<tfoot>
+										<tr>
+											<td colspan="6" class="text-center">
+												<button type="button" class="btn btn-primary" ng-click="addParent($index)"><span class="fa fa-plus"></span> Add Parent</button>
+											</td>
+											<td class="subtotal text-right">
+												<label>Subtotal: <span>{{ subTotal($index) | currency: '₱ ' }}</span></label>
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row text-center" ng-show="!quoteHeader.items.length">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<p><i class="fa fa-exclamation-circle"></i> No particulars yet!</p>
+						</div>
+					</div>
+				</div>
+				
+				<div class="pull-right">
+					<div class="row">
+						<div class="form-group">
+							<label>Total Amount: </label>
+							<input type="text" class="form-control text-right" value="{{ grandTotal() | currency: '₱ ' }}" readonly />
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<label>VAT(%): </label>
+							<input type="number" class="form-control text-right" ng-model="quotelist.vat_rate" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<label>TOTAL PROJECT COST (VAT INCLUSIVE): </label>
+							<input type="text" class="form-control text-right" value="{{ quotelist.computePercentage() | currency: '₱ ' }}" readonly />
+						</div>
+					</div>
+					<!-- 
+					<div class="row">
+						<div class="form-group">
+							<button type="button" class="btn btn-default" ng-click="quotelist.computePercentage()">COMPUTE PERCENTAGE VALUE</button>
+						</div>
+					</div> 
+					-->
+				</div>
+
+				<div class="clearfix"></div>
+
+			</div>
+
+			<div class="panel" ng-show="panel.isSelected(2)" style="min-height: 100px; padding: 10px;">
+				<div ckeditor="options" ng-model="quotelist.content" ready="onReady()"></div>
+				<!-- show formmated html
+				<div class="well" ng-bind="content"></div>
+				-->
+			</div>
+
+		</section>
+
+	</div>
+		
+</div>
+<script type="text/javascript">
+
+	//CALL OUR MODULE AND LOAD SOME MODULES
+	var quotationList = angular.module('quotation_list', ['jsonFormatter','ui.bootstrap','ckeditor']);
+
+	quotationList.controller('quoteListCtrl', function($scope, $http) {
+
+		var quoteList = this;
+
+		$scope.quoteHeader = {};
+		
+		$scope.quoteHeader = {
+			items: []
+		}
+		
+		//THIS WILL DISPLAY THE ARRAYS IN JSON OBJECT FORMAT
+		$scope.json_output = angular.fromJson($scope.quoteHeader); //display formatted json view
+		$scope.json_view = angular.fromJson($scope.quoteHeader); //display raw json view
+		
+		//INITILIZE VALUE FOR PARENT PARTICULAR
+		$scope.addParticularHeader = function() {
+			
+			$scope.quoteHeader.items.push({
+				particular_name: 'SAMPLE PARTICULAR TITLE',
+				child_label: {
+					items: []
+				}
+			});
+			
+		}
+		
+		$scope.removeQuoteHeader = function($index) {
+			$scope.quoteHeader.items.splice($index, 1);
+		}
+		
+		//INITILIZE VALE AFTER APPENDING NEW ROW
+		$scope.addParent = function($index) {
+			
+			//here we will append the new row
+			
+			$scope.quoteHeader.items[$index].child_label.items.push({
+				particular: 'Sample Particular Name',
+				unit: 1,
+				unit_label: 'sqm',
+				unit_price: 0.00,
+				subtotal: 0.00,
+				sublevel: {
+					items: []
+				}
+			}); 
+			
+		}
+		
+		//REMOVE SUB PARENT
+		$scope.removeParent = function(parent_id, $index) {
+			$scope.quoteHeader.items[parent_id].child_label.items.splice($index, 1);
+		}
+		
+		$scope.addSubLevel = function(parent_id) {
+			//console.log(parent_id);
+		}
+		
+		$scope.grand_total = [];
+		
+		//COMPUTE SUBTOTAL PER ARRAY
+		$scope.subTotal = function($index) {
+			
+			var total = 0;
+			
+			angular.forEach($scope.quoteHeader.items[$index], function(value){
+				
+				angular.forEach(value.items, function(v) {
+					total += v.unit * v.unit_price;
+				});
+				
+			});
+			
+			$scope.grand_total[$index] = total
+			
+			return total;
+			
+		}
+		
+		//SUMMARIZE ALL SUBTOTAL
+		function computeGrandTotal() {
+			
+			var total = 0;
+
+			//console.log($scope.grand_total);
+			
+			angular.forEach($scope.grand_total, function(value) {
+				total += value;
+			});
+			
+			return total;
+			
+		}
+		
+		$scope.grandTotal = function() {
+			return computeGrandTotal();
+		}
+
+		quoteList.vat_rate = 0;
+
+		quoteList.computePercentage = function() {
+			
+			var grandtotal = 0;
+
+			var formatPercentage = quoteList.vat_rate / 100;
+			var total_amount = computeGrandTotal() * formatPercentage;
+			
+			grandtotal = computeGrandTotal() + total_amount;
+
+			return grandtotal;
+
+		}
+
+		//pass to function for saving - can't access quoteList.computePercentage
+		function computePercentage() {
+
+			var grandtotal = 0;
+
+			var formatPercentage = quoteList.vat_rate / 100;
+			var total_amount = computeGrandTotal() * formatPercentage;
+			
+			grandtotal = computeGrandTotal() + total_amount;
+
+			return grandtotal;
+
+		}
+		
+		$scope.toggleList = false;
+		
+		$scope.toggleDetail = function($index) {
+			$scope.toggler = !$scope.toggler;
+		}
+		
+		//VALIDATE IF THERE'S A VALUES
+		$scope.hasContent = function() {
+			
+			return $scope.quoteHeader.items.length > 0 ? true : false
+			
+		}
+		
+		//SAVE OUR DATA
+		$scope.saveContent = function() {
+
+			$scope.totals = [{
+				'subtotals'	: computeGrandTotal(),
+				'vat_rate'	: quoteList.vat_rate,
+				'grandtotal': computePercentage()
+			}];
+
+			$http({
+				url: "<?php echo base_url('index.php/tutorial/submitQuotation'); ?>",
+				method: 'POST',
+				data: $.param({ 
+						quotation: $scope.quoteHeader.items, 
+						msc: quoteList, 
+						totals: $scope.totals 
+					}),
+				headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+			}).success(function(data){
+				alert('Data successfully inserted!');
+			}).error(function(){
+				alert('Error Occured!');
+			});
+
+		}
+
+		//DATEPICKER FUNCTION
+		$scope.today = function() {
+    		quoteList.dt = new Date();
+  		};
+
+  		$scope.today();
+  
+		$scope.toggleMin = function() {
+			$scope.minDate = $scope.minDate ? null : new Date();
+		};
+
+  		$scope.toggleMin();
+
+		$scope.clear = function () {
+			$scope.dt = null;
+		};
+  
+		$scope.open = function($event) {
+			$event.preventDefault();
+			$event.stopPropagation();
+
+			$scope.opened = true;
+		};
+
+		$scope.dateOptions = {
+			formatYear: 'yy',
+			startingDay: 1
+		};
+
+		$scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'yyyy-MM-dd','MM/dd/yyyy','shortDate'];
+		$scope.format = $scope.formats[4];
+  
+		$scope.getDayClass = function(date, mode) {
+
+			if (mode === 'day') {
+
+				var dayToCheck = new Date(date).setHours(0,0,0,0);
+
+				for (var i=0;i<$scope.events.length;i++){
+					var currentDay = new Date($scope.events[i].date).setHours(0,0,0,0);
+
+					if (dayToCheck === currentDay) {
+						return $scope.events[i].status;
+					}
+				}
+			}
+
+    		return '';
+  		};
+
+		//CKEDITOR OPTIONS
+		$scope.options = {
+			language: 'en',
+			allowedContent: true,
+			entities: false,
+		};
+
+		// Called when the editor is completely ready.
+		$scope.onReady = function () {
+			// ... test
+		};
+		
+  		//CKEDITOR init value sample template
+  		quoteList.content = '<h4><strong><u>TERMS &amp; CONDITION</u></strong></h4> <hr /> <p style="text-align: left;"><span style="color:#A52A2A;"><b>Lorem ipsum</b></span> dolor sit amet, id mea regione epicuri torquatos. Id cum diam eleifend, quo et inermis blandit. Vel fabulas salutandi ei. His ex malis interesset, nostrum oportere intellegat no qui. Sed veniam malorum mnesarchum id, an mea noster ocurreret tincidunt.</p> <ol> <li> <ul> <li>Ad mel soluta conclusionemque. Qui amet praesent expetendis ne, vis regione tibique</li> </ul> <ul> <li>adhuc omnesque contentiones ei sea</li> <li>Munere gubergren vim ut, est suavitate erroribus constituto ex</li> <li>Sale aeque quaerendum no duo, nibh saepe dicant quo ut, malis discere delicata has ad</li> </ul> </li> <li>Hinc <i>repudiare </i>id sit, at vide pericula his, ad dicam referrentur accommodare pro.</li> <li>Animal persius labitur eu est, putant nonumes evertitur nec te</li> <li>Duo posse augue inani at, id <b>lorem noster</b> melius duo</li> <li>Aliquip repudiandae eam ex, eu paulo electram sit. Putant argumentum cu sit, pri ex wisi omnes accusata, ne audiam quaeque deterruisset eam</li> <li>Usu ut quaeque accusata, ex eam rebum disputationi</li> <li>Duo timeam invenire suscipiantur te, nec copiosae <span style="color:#A52A2A;"><b>expetenda signiferumque</b></span> ex, sit ad libris delicata honestatis</li> </ol> <p>&nbsp;</p> <p>Libris gloriatur ut nec, ut pri purto reformidans contentiones. Nihil lobortis sensibus has ea. Justo aeterno suscipit ex usu, modus audire explicari vel ut, dicunt laoreet delectus in mei.Dolore doming doctus vim te, no omittam nominati perpetua nec, cu qui sumo dictas adversarium. Sit labore persequeris eu. No quodsi delicata appellantur his, eum sonet legimus assueverit in.</p> <hr /> <p style="text-align: center;"><i>Natum possit prompta an quo. Sea at civibus constituam consequuntur, stet possit patrioque eu vis, suas impedit usu cu.</i></p> <p style="text-align: left;">_____________________________</p> <p style="text-align: left;"><strong>SAMPLE NAME</strong></p> <p style="text-align: left;">(sample position)</p> ';
+		
+
+	});
+
+	quotationList.controller('PanelController', function() {
+		//TABS
+		this.tab = 1;
+
+		this.selectTab = function(setTab) {
+			this.tab = setTab;
+		}
+
+		this.isSelected = function(checkTab) {
+			//console.log(this.tab === checkTab);
+			return this.tab === checkTab;
+		}
+
+	});
+
+</script>

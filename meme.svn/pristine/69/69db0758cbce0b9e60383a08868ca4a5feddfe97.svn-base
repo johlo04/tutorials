@@ -1,0 +1,178 @@
+<h3>Quotation List Form</h3>
+
+<div class="row" ng-app="quotation_list">
+	
+	<div ng-controller="quoteList">
+		
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<button type="button" class="btn btn-primary" ng-click="addParticularHeader()"><span class="fa fa-plus"></span> Add Particular Header</button>
+			</div>
+		</div>
+		
+		<hr />
+		
+		<div class="well dark">
+			<json-formatter json="json_output" open="1" class="json-formatter-dark"></json-formatter>
+		</div>
+		
+		<div ng-repeat="item in quoteHeader.items" class="row">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h5 class="panel-title" contenteditable>{{ item.particular_name }} - {{ $index + 1}}<span class="pull-right btn btn-danger" ng-click="removeQuoteHeader($index)"><span class="fa fa-times"></span> Remove</span></h5>
+					<div class="clearfix"></div>
+				</div>
+				<div class="panel-body">
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<td class="text-center">No.</td>
+									<td class="text-center">Particulars</td>
+									<td class="text-center">Unit</td>
+									<td class="text-center">Unit Label</td>
+									<td class="text-center">Unit(Price)</td>
+									<td class="text-center">Unit Price(Php)</td>
+									<td class="text-center"></td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="item in quoteHeader.items[$index].child_label.items">
+									<td class="text-center">{{ $index + 1 }}</td>
+									<td class="text-center"><input type="text" class="form-control" ng-model="item.particular" /></td>
+									<td class="text-center">
+										<input type="number" class="form-control text-center" ng-model="item.unit" ng-minlength="1" />
+									</td>
+									<td class="text-center">
+										<select class="form-control">
+											<option value="sqm">sqm</option>
+											<option value="lot">lot</option>
+											<option value="sets">sets</option>
+										</select>
+									</td>
+									<td class="text-center">
+										<input type="number" class="form-control text-right" ng-model="item.unit_price" />
+									</td>
+									<td class="text-center">
+										<input type="text" class="form-control text-right" value="{{ item.unit * item.unit_price | currency: '₱ ' }}" readonly />
+									</td>
+									<td class="text-center">
+										<button type="button" class="btn btn-primary" ng-click="addSubLevel($parent.$index)"><span class="fa fa-plus"></span></button>
+										<button type="button" class="btn btn-danger" ng-click="removeParent($parent.$index, $index)"><span class="fa fa-times"></span></button>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="7" class="text-center" ng-show="!quoteHeader.items[$index].child_label.items.length">
+										<p>No list yet!</p>
+									</td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="6" class="text-center">
+										<button type="button" class="btn btn-primary" ng-click="addParent($index)"><span class="fa fa-plus"></span> Add Parent</button>
+									</td>
+									<td>
+										<label>Subtotal: <span>{{ subTotal($index) | currency: '₱ ' }}</span></label>
+									</td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row text-center" ng-show="!quoteHeader.items.length">
+			<p>No particulars yet!</p>
+		</div>
+		
+		<div class="well">
+			<div class="text-right">{{ grandTotal() | currency: '₱ ' }}</div>
+		</div>
+		
+	</div>
+	
+</div>
+<script type="text/javascript">
+	
+	var quotationList = angular.module('quotation_list', ['jsonFormatter']);
+	
+	quotationList.controller('quoteList', function($scope) {
+		
+		$scope.quoteHeader = {};
+		
+		$scope.quoteHeader = {
+			items: []
+		}
+		
+		$scope.json_output = angular.fromJson($scope.quoteHeader); //display json view
+		
+		$scope.addParticularHeader = function() {
+			
+			$scope.quoteHeader.items.push({
+				particular_name: 'SAMPLE PARTICULAR TITLE',
+				child_label: {
+					items: []
+				}
+			});
+			
+		}
+		
+		$scope.removeQuoteHeader = function($index) {
+			$scope.quoteHeader.items.splice($index, 1);
+		}
+		
+		$scope.addParent = function($index) {
+			
+			//here we will append the new row
+			//console.log($scope.quoteHeader.items[$index].child_label);
+			
+			$scope.quoteHeader.items[$index].child_label.items.push({
+				particular: 'Sample Particular Name',
+				unit: 1,
+				unit_label: 'sqm',
+				unit_price: 0.00,
+				unit_subtotal: 0.00,
+				sublevel: {
+					items: []
+				}
+			}); 
+			
+		}
+		
+		$scope.removeParent = function(parent_id, $index) {
+			$scope.quoteHeader.items[parent_id].child_label.items.splice($index, 1);
+		}
+		
+		$scope.addSubLevel = function(parent_id) {
+			
+			console.log(parent_id);
+			
+		}
+		
+		$scope.grand_total = {};
+		
+		$scope.subTotal = function($index) {
+			
+			var total = 0;
+			
+			angular.forEach($scope.quoteHeader.items[$index], function(value){
+				
+				angular.forEach(value.items, function(v) {
+					total += v.unit * v.unit_price; 
+				});
+				
+			});
+			
+			return total;
+			
+		}
+		
+		$scope.grandTotal = function() {
+			
+		}
+		
+	});
+
+</script>

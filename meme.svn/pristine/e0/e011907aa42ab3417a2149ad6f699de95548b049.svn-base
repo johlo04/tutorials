@@ -1,0 +1,22 @@
+<?php 
+if ( ! function_exists('fp')){
+	function fp($array) {
+		
+		echo "<pre style='background: #000; color: #fff; font-size: 10px'>";
+			print_r($array);
+		echo "</pre>";
+		
+	}
+}
+
+if ( ! function_exists('fd')){
+	function fd($array) {
+		
+		echo "<pre style='background: #000; color: #fff; font-size: 10px'>";
+			print_r($array);
+		echo "</pre>";
+		exit();
+		
+	}
+}
+?>

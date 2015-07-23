@@ -1,0 +1,185 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: jerielle14
+ * Date: 6/22/2015
+ * Time: 2:44 PM
+ */
+
+class Model_Tutorial extends CI_Model {
+	
+	public function getAllArticle() {
+		
+		$query = $this->db->query("SELECT * FROM articles");
+		
+		if($query->num_rows() > 0) {
+			return $query->result_array();
+		} else {
+			return false;
+		}
+		
+	}
+	
+	public function getAllNote() {
+		
+		$query = $this->db->query("SELECT * FROM note");
+		
+		if($query->num_rows() > 0) {
+			return $query->result_array();
+		} else {
+			return false;
+		}
+		
+	}
+	
+	public function saveNote($subject, $message, $sender) {
+		
+		$sql = "INSERT INTO note SET subject = '" . $subject . "', writer = '" . $writer . "', message = '" . $message . "', date_added = NOW(), date_modified = NOW()";
+		$query = $this->db->query($sql);
+		
+		if($query) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	public function saveQuotation($data_array = array()) {
+		
+		foreach($data_array as $values) {
+			
+			$sqlInsertHeader = "INSERT INTO particular_header SET particular_name = " . $this->db->escape($values['particular_name']) . ",status='1'";
+			$insertHeader = $this->db->query($sqlInsertHeader);
+			
+			$quotation_id = $this->db->insert_id();
+			
+			foreach($values['child_label']['items'] as $value) {
+				
+				$sqlInsertQuotationItems = "INSERT INTO particular_header_items SET 
+											particular_header_id='" . (int)$quotation_id . "', 
+											particular_name=" . $this->db->escape($value['particular']) . ", 
+											unit='" . (int)$value['unit'] . "', 
+											unit_label = " . $this->db->escape($value['unit_label']) . ",
+											unit_price = " . (int)$value['unit_price'] . ",
+											unit_subtotal = " . $value['unit'] * $value['unit_price'] . "";
+				
+				$insertContent = $this->db->query($sqlInsertQuotationItems);
+				
+			}
+			
+		}
+		
+	}
+
+	public function updateQuotation($data_array = array(), $id) {
+
+		//remove and reinsert
+		$selectParentID = $this->db->query("SELECT id FROM particular_header WHERE project_id = '" . (int)$id . "'");
+
+		if($selectParentID->num_rows()) {
+
+			//remove child
+			foreach($selectParentID->result_array() as $ids) {
+				$deleteChildParticular = $this->db->query("DELETE FROM particular_header_items WHERE particular_header_id = '" . (int)$ids['id'] . "'");
+			}
+
+			//remove parent
+			$deleteParentParticular = $this->db->query("DELETE FROM particular_header WHERE project_id = '" . (int)$id . "'");
+
+		} else {	
+			$deleteParentParticular = $this->db->query("DELETE FROM particular_header WHERE project_id = '" . (int)$id . "'");
+		}
+
+		foreach($data_array as $values) {
+			
+			$sqlInsertHeader = "INSERT INTO particular_header SET project_id = '" . (int)$id . "',particular_name = " . $this->db->escape($values['particular_name']) . ",status='1'";
+			$insertHeader = $this->db->query($sqlInsertHeader);
+			
+			$quotation_id = $this->db->insert_id();
+			
+			foreach($values['child_label']['items'] as $value) {
+				
+				$sqlInsertQuotationItems = "INSERT INTO particular_header_items SET 
+											particular_header_id='" . (int)$quotation_id . "', 
+											particular_name=" . $this->db->escape($value['particular']) . ", 
+											unit='" . (int)$value['unit'] . "', 
+											unit_label = " . $this->db->escape($value['unit_label']) . ",
+											unit_price = " . (int)$value['unit_price'] . ",
+											unit_subtotal = " . $value['unit'] * $value['unit_price'] . "";
+				
+				$insertContent = $this->db->query($sqlInsertQuotationItems);
+				
+			}
+			
+		}
+
+
+
+	}
+
+	public function getProjectList($limit, $start) {
+
+		$this->db->limit($limit, $start);
+		$query = $this->db->get('projects');
+
+		if($query->num_rows() > 0) {
+			return $query->result_array();
+		} else {
+			return false;
+		}
+		
+
+	}
+
+	public function getTotalProjectList() {
+
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM projects");
+
+		if($query->num_rows()) {
+			return $query->row_array();
+		} else {
+			return array();
+		}
+
+	}
+
+	public function getQuotationList($id) {
+
+		$quotation_list = array();
+
+		$sqlGetHeader = "SELECT * FROM particular_header WHERE project_id = '" . (int)$id . "'";
+		$queryGetheader = $this->db->query($sqlGetHeader);
+
+		foreach($queryGetheader->result_array() as $list_header) {
+
+			$queryGetList = $this->db->query("SELECT * FROM particular_header_items WHERE particular_header_id = '" . (int)$list_header['id'] . "'");
+									
+			$quot = array();
+
+			foreach($queryGetList->result_array() as $list) {
+				$quot[] = array(
+					'particular' => $list['particular_name'],
+					'unit' => (int)$list['unit'],
+					'unit_label' => $list['unit_label'],
+					'unit_price' => (float)$list['unit_price'],
+					'subtotal' => $list['unit_subtotal'],
+					'sublevel' => array(
+						'items' => array()
+					)
+				);
+			}
+
+			$quotation_list['items'][] = array(
+				'particular_name' => $list_header['particular_name'],
+				'child_label' => array(
+					'items' => $quot
+				)
+			);
+		}
+
+		return $quotation_list;
+
+	}
+
+}

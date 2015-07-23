@@ -1,0 +1,297 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: jerielle14
+ * Date: 6/22/2015
+ * Time: 2:43 PM
+ */
+
+class Tutorial extends CI_Controller {
+	
+	public function __construct() {
+		parent::__construct();
+		$this->load->helper('custom');
+	}
+	
+	public function index() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/hello_world');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function ajax() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/ajax');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function ajaxCall() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/ajax_call');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function getAjaxData() {
+		
+		$this->load->model('model_tutorial');
+		
+		$articles = $this->model_tutorial->getAllArticle();
+		
+		$data['article_data'] = array();
+		
+		if(count($articles > 0)) {
+			
+			foreach($articles as $article) {
+				$data['article_data'][] = array(
+					'id' => $article['id'],
+					'title' => $article['title'],
+					'body' => $article['body'],
+					'created_at' => $article['created_at'],
+					'updated_at' => $article['updated_at']
+				);
+			}
+			
+			echo json_encode($data);
+			
+		}
+		
+	}
+	
+	public function eventTrigger() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/event_trigger');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function dom() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/dom');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function controller() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/controller');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function forms() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/forms');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function validation() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/validation');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function noteList() {
+		
+		$this->load->model('model_tutorial');
+		
+		$getAllNote = $this->model_tutorial->getAllNote();
+		
+		$data['note_list'] = array();
+		
+		if($getAllNote) {
+			foreach($getAllNote as $note) {
+				$data['note_list'][] = array(
+					'id' => $note['id'],
+					'subject' => $note['subject'],
+					'writer' => $note['writer'],
+					'message' => $note['message'],
+				);
+			}
+		} else {
+			$data['note_list'] = array();
+		}
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/note_list', $data);
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function getNoteData() {
+		
+		$subject = $this->input->post('subject', TRUE);
+		$message = $this->input->post('message', TRUE);
+		$sender = $this->input->post('sender', TRUE);
+		
+		$json = array();
+		
+		$this->load->model('model_tutorial');
+		
+		$save_state = $this->model_tutorial->saveNote($subject, $message, $sender);
+		
+		if($save_state) {
+			$json['status'] = 1;
+		} else {
+			$json['status'] = 0;
+		}
+	
+	}
+	
+	public function directive() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/directive');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function table() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/table');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function append() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/append_list');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function quotation() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/quotation_list');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function submitQuotation() {
+		
+		$input_data = $this->input->post('quotation');
+		
+		$this->load->model('model_tutorial');
+		
+		$saveQuotation = $this->model_tutorial->saveQuotation($input_data);
+		
+		$json = array();
+		$json['status'] = 1;
+		
+		return json_encode($json);
+		
+	}
+
+	public function updateQuotation() {
+
+		$input_data = $this->input->post('quotation');
+		$id = $this->input->post('id');
+		
+		$this->load->model('model_tutorial');
+		
+		$updateQuotation = $this->model_tutorial->updateQuotation($input_data, $id);
+		
+		$json = array();
+		$json['status'] = 1;
+		
+		return json_encode($json);
+
+	}
+	
+	public function quotation_list() {
+		
+		$this->load->library('pagination');
+		$this->load->model('model_tutorial');
+
+		$countTotalRow = $this->model_tutorial->getTotalProjectList();
+
+		$config = array();
+		$config['base_url'] = site_url('/tutorial/quotation_list');
+		$config['total_rows'] = $countTotalRow['total'];
+		$config['per_page'] = 5;
+
+		//config for bootstrap pagination class integration
+        $config['full_tag_open'] = '<ul class="pagination">';
+        $config['full_tag_close'] = '</ul>';
+        $config['first_link'] = false;
+        $config['last_link'] = false;
+        $config['first_tag_open'] = '<li>';
+        $config['first_tag_close'] = '</li>';
+        $config['prev_link'] = '&laquo';
+        $config['prev_tag_open'] = '<li class="prev">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_link'] = '&raquo';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li>';
+        $config['last_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="active"><a href="#">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '</li>';
+
+		$this->pagination->initialize($config);
+
+		$page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+		$data['results'] = $this->model_tutorial->getProjectList($config['per_page'], $page);
+
+		$data['links'] = $this->pagination->create_links();
+
+		$this->load->view('common/header');
+		$this->load->view('templates/list_content', $data);
+		$this->load->view('common/footer');
+		
+	}
+
+	public function project_list() {
+
+		$id = $this->uri->segment(3);
+		$this->load->model('model_tutorial');
+
+		$data['id'] = $id;
+		$data['result'] = json_encode($this->model_tutorial->getQuotationList($id));
+
+		$this->load->view('common/header');
+		$this->load->view('templates/quotation_list_view', $data);
+		$this->load->view('common/footer');
+
+	}
+	
+	public function promise() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/promise_call');
+		$this->load->view('common/footer');
+		
+	}
+	
+	public function excel() {
+		
+		$this->load->view('common/header');
+		$this->load->view('templates/excel_template');
+		
+	}
+
+	public function generateExcel() {
+
+		$this->load->view('templates/excel');
+
+	}
+	
+	
+}

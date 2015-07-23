@@ -1,0 +1,48 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: jerielle14
+ * Date: 6/22/2015
+ * Time: 2:44 PM
+ */
+
+class Model_Tutorial extends CI_Model {
+	
+	public function getAllArticle() {
+		
+		$query = $this->db->query("SELECT * FROM articles");
+		
+		if($query->num_rows() > 0) {
+			return $query->result_array();
+		} else {
+			return false;
+		}
+		
+	}
+	
+	public function getAllNote() {
+		
+		$query = $this->db->query("SELECT * FROM note");
+		
+		if($query->num_rows() > 0) {
+			return $query->result_array();
+		} else {
+			return false;
+		}
+		
+	}
+	
+	public function saveNote($subject, $message, $sender) {
+		
+		$sql = "INSERT INTO note SET subject = '" . $subject . "', writer = '" . $writer . "', message = '" . $message . "', date_added = NOW(), date_modified = NOW()";
+		$query = $this->db->query($sql);
+		
+		if($query) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+
+}

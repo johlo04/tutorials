@@ -1,0 +1,99 @@
+<h3>Quotation List Form</h3>
+
+<div class="row" ng-app="quotation_list">
+	
+	<div ng-controller="quoteList">
+		
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<button type="button" class="btn btn-default" ng-click="addParticularHeader()">Add Particular Header</button>
+			</div>
+		</div>
+		
+		<hr />
+		
+		<div ng-repeat="item in quoteHeader.items" class="row">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h5 class="panel-title" contenteditable>{{ item.particular_name }} - {{ $index + 1}}<span class="pull-right" ng-click="removeQuoteHeader($index)">Remove</span></h5>
+				</div>
+				<div class="panel-body">
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<td>No.</td>
+									<td>Particulars</td>
+									<td>Unit</td>
+									<td>Unit Label</td>
+									<td>Unit(Price)</td>
+									<td>Unit Price(Php)</td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="parent_item in quoteParent.items">
+									<td>{{ $index + 1 }}</td>
+									<td><input type="text" class="form-control" ng-model="parent_item[$index].particular" /></td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="5" class="text-center">
+										<button type="button" class="btn btn-default" ng-click="addParent($index)">Add Parent</button>
+									</td>
+									<td>
+										<label>Subtotal: <span>0.00</span></label>
+									</td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+	
+</div>
+<script type="text/javascript">
+	
+	var quotationList = angular.module('quotation_list', []);
+	
+	quotationList.controller('quoteList', function($scope) {
+		
+		$scope.quoteHeader = {
+			items: [
+				{
+					particular_name: 'SAMPLE PARTICULAR TITLE'
+				}
+			]
+		}
+		
+		$scope.addParticularHeader = function() {
+			
+			$scope.quoteHeader.items.push({
+				particular_name: 'SAMPLE PARTICULAR TITLE'
+			});
+			
+		}
+		
+		$scope.removeQuoteHeader = function($index) {
+			$scope.quoteHeader.items.splice($index, 1);
+		}
+		
+		$scope.addParent = function($index) {
+			
+			$scope.quoteParent = {
+				items: [{
+					particular: 'Sample Parent',
+					unit: 0.00,
+					unit_label: 'sqm',
+					unit_price: 0.00,
+				}]
+			}
+			
+		}
+		
+	});
+
+</script>
